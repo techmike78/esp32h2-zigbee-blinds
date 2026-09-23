@@ -1,0 +1,45 @@
+# Zigbee: sleepy end device на встроенном нативном радио 802.15.4 ESP32-H2.
+# Полностью перенесено из esp32h2_light_sleep_test (roadmap.md) — там же
+# проверено на реальном железе, что каждая из этих опций даёт/не даёт.
+CONFIG_ZB_ENABLED=y
+CONFIG_ZB_ZED=y
+CONFIG_ZB_RADIO_NATIVE=y
+
+# Power management: реальный light sleep. esp_pm_configure() ВСЁ РАВНО нужен
+# в коде (main.c, app_main) — без него автоматический tickless-idle путь не
+# выбирает PM_MODE_LIGHT_SLEEP никогда, независимо от этих флагов (проверено
+# чтением pm_impl.c, esp32h2_light_sleep_test roadmap.md Этап 13).
+CONFIG_PM_ENABLE=y
+CONFIG_FREERTOS_USE_TICKLESS_IDLE=y
+CONFIG_FREERTOS_IDLE_TIME_BEFORE_SLEEP=10
+CONFIG_ESP_SYSTEM_PM_POWER_DOWN_CPU=y
+CONFIG_ESP_SYSTEM_PM_POWER_DOWN_RTC=y
+
+# Проверено вместе с esp_pm_configure() — реальный ток сна 0.07-0.17мА.
+CONFIG_IEEE802154_SLEEP_ENABLE=y
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_SLEEP_POWER_DOWN_FLASH=y
+
+# CONFIG_PM_POWER_DOWN_PERIPHERAL_IN_LIGHT_SLEEP сознательно НЕ включён —
+# безусловно несовместим с esp_sleep_enable_gpio_wakeup() (кнопки) на уровне
+# исходника ESP-IDF (sleep_modes.c), не лечится ни таймингом, ни порядком
+# вызовов. Подробности — esp32h2_light_sleep_test/roadmap.md, Этап 13.
+
+# Реальный физический размер флеша платы (4MB).
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
+
+# OTA-обновление по Zigbee (см. main.c, ota_upgrade_handler()): откат на прошлую прошивку, если новая после
+# OTA не подтвердила себя (esp_ota_mark_app_valid_cancel_rollback() после входа в сеть) — без этого неудачное
+# обновление устройства, до которого нет кабеля, необратимо. Опция ЗАГРУЗЧИКА — по воздуху не обновляется,
+# первую прошивку с ней нужно залить по USB один раз.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# Диагностика краша "assert failed: vPortExitCritical ... port_uxCriticalNesting[0] > 0":
+# по стеку вызовов (addr2line по всему дампу стека, не только MEPC/RA) краш происходит
+# внутри esp_zb_zcl_set_attribute_val() -> zboss internals (zb_zcl_mark_attr_for_reporting_manuf
+# -> zb_schedule_callback -> zb_osif_enable_all_interrupts), вызванной из timer_task
+# (служебная задача esp_timer — и hourly_report_cb(), и motor_poll_timer_cb() выполняются
+# именно в ней). Дефолтный стек этой задачи (3584 байта) выглядит маловато для такой глубины
+# вызовов через закрытую библиотеку zboss — пробуем увеличить как первый диагностический шаг.
+CONFIG_ESP_TIMER_TASK_STACK_SIZE=8192
