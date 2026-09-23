@@ -7,7 +7,7 @@ directly with **Zigbee2MQTT** and run for weeks/months on a 2S Li-ion pack.
 
 ## Features
 
-- DC gear motor (DRV8871 driver) with soft speed ramp near the travel limits.
+- DC gear motor (DRV8870 driver) with soft speed ramp near the travel limits.
 - Pulse encoder for absolute position tracking (0–100% reported to Zigbee).
 - Physical buttons (UP / DOWN / SET) with single-click, long-press and combo actions
   (calibration, motor direction invert, pairing mode, factory reset).
@@ -24,7 +24,7 @@ directly with **Zigbee2MQTT** and run for weeks/months on a 2S Li-ion pack.
 
 ## Hardware
 
-Custom PCB (`pcb/`, Altium project) around an ESP32-H2 module, DRV8871 motor driver, a
+Custom PCB (`pcb/`, Altium project) around an ESP32-H2 module, DRV8870 motor driver, a
 battery charger/2S protection circuit, and a pulse encoder tapped off the gear motor.
 3D-printable enclosure and mounting parts are under `frame/` (STEP/STL). Pinout is defined at
 the top of [`src/main.c`](src/main.c); the key GPIOs:
