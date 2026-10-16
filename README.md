@@ -83,7 +83,8 @@ delivery, etc.).
 - `src/main.c` — the entire firmware (single file).
 - `my_blind_controller.js` — Zigbee2MQTT external converter.
 - `tools/make_ota.py`, `tools/post_build_ota.py` — OTA image packaging (auto-run on build).
-- `pcb/` — Altium PCB design + manufacturing outputs (Gerbers).
+- `pcb/` — Altium design sources of the built board (v1); generated manufacturing outputs (Gerbers) are not published.
+- `pcb_8251A_v2/` — next board revision (in progress): DRV8251A motor driver with integrated current sensing instead of DRV8870 with an external shunt.
 - `frame/` — 3D-printable enclosure/mounting parts (STEP/STL) and reference part models.
 - `zigbee.csv` — flash partition table (dual-slot, sized for OTA).
 
